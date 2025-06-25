@@ -4,7 +4,6 @@ import { SmartMarkdownEditor } from './components/editor/Editor'
 const App: FC = () => {
 
   const onChangeMarkdown = () => {
-    console.log('dsadas')
   }
   
   return (
