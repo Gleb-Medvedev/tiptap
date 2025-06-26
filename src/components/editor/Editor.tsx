@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { EditorContent, useEditor } from '@tiptap/react';
+import React, { useEffect, useRef, useState, type FC } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 import Table from '@tiptap/extension-table'
 import TableRow from '@tiptap/extension-table-row'
 import TableCell from '@tiptap/extension-table-cell'
@@ -8,49 +9,36 @@ import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Blockquote from '@tiptap/extension-blockquote';
 import Code from '@tiptap/extension-code';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+// import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
-import StarterKit from '@tiptap/starter-kit';
-import { marked } from 'marked';
-import { generateHTML, generateJSON } from '@tiptap/html';
+import { generateHTML } from '@tiptap/html';
 import MarkdownIt from 'markdown-it';
-// import Markdown from '@tiptap/extension-markdown';
-import './Editor.css'
 import TurndownService from 'turndown';
+import './Editor.css';
+import Toolbar from './EditorToolbar';
+import TableGridSelector from './EditorTablePicker';
+import MapsUgcOutlinedIcon from '@mui/icons-material/MapsUgcOutlined';
 
+const md = new MarkdownIt();
+const turndownService = new TurndownService();
 
-type Props = {
-  initialMarkdown: string;
-  onChangeMarkdown: (markdown: string) => void;
-};
+interface SmartMarkdownProps {
+  onInsertTable?: () => void;
+}
 
-export const SmartMarkdownEditor: React.FC<Props> = ({
-  initialMarkdown,
-  onChangeMarkdown,
-}) => {
-  const [htmlFromMarkdown, setHtmlFromMarkdown] = useState('');
+const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
+    const editorRef = useRef(null);
+
+    const [selectedText, setSelectedText] = useState<string | null>(null);
+    const [showTableGrid, setShowTableGrid] = useState(false);
     const [popupPosition, setPopupPosition] = useState<{ top: number; left: number } | null>(null);
-      const [selectedText, setSelectedText] = useState<string | null>(null);
-  const editorRef = useRef(null);
-  const popupRef = useRef(null);
-  const [showTableGrid, setShowTableGrid] = useState(false);
-const [gridSize, setGridSize] = useState({ rows: 0, cols: 0 });
-
-
-
-  // При первом рендере — конвертим Markdown в HTML
-  useEffect(() => {
-    const html = marked(initialMarkdown || '');
-    setHtmlFromMarkdown(html as any);
-  }, [initialMarkdown]);
+    const [cellPosition, setCellPosition] = useState<{ top: number, left: number } | null>(null);
 
   const editor = useEditor({
-      // content,
-    content: htmlFromMarkdown,
-    extensions: [StarterKit,     Table.configure({
+    extensions: [StarterKit, Table.configure({
       resizable: true,
     }),
-        Image,
+    Image,
     Link.configure({
       openOnClick: false,
     }),
@@ -59,12 +47,17 @@ const [gridSize, setGridSize] = useState({ rows: 0, cols: 0 });
     HorizontalRule,
     TableRow,
     TableHeader,
-    TableCell,],
-        onSelectionUpdate: ({ editor }) => {
+    TableCell,  
+  ],
+    content: md.render(`# Привет! \n\n**Это жирный**, *а это курсивный* текст.`),
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      const markdown = turndownService.turndown(html);
+    },
+    onSelectionUpdate: ({ editor }) => {
       const { from, to } = editor.state.selection;
 
-      if (from === to) {
-        // Нет выделения — скрываем
+      if (from === to || !editorRef.current) {
         setPopupPosition(null);
         setSelectedText(null);
         return;
@@ -81,187 +74,147 @@ const [gridSize, setGridSize] = useState({ rows: 0, cols: 0 });
         left: rect.left + window.scrollX + rect.width / 2,
       });
 
-      const selected = editor.state.doc.textBetween(from, to, '\n');
-      setSelectedText(selected);
+      const selectedTextRange = editor.state.doc.textBetween(from, to, '\n');
+      setSelectedText(selectedTextRange);
     },
-
   });
-
-  if (!editor) {
-    return null;
-  }
 
   useEffect(() => {
-  if (!editor) return;
+    if (!editor) return;
 
-  editor.on('selectionUpdate', ({ editor }) => {
-    const { from, to } = editor.state.selection;
-    const selectedText = editor.state.doc.textBetween(from, to, '\n');
-    console.log('Выделено:', selectedText);
-  });
-}, [editor]);
+    const handlePaste = (event: ClipboardEvent) => {
+      const html = event.clipboardData?.getData('text/html');
+      const text = event.clipboardData?.getData('text/plain');
+
+      if (html) {
+        editor.commands.setContent(html, false);
+        event.preventDefault();
+      } else if (text) {
+        editor.commands.setContent(md.render(text), false);
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener('paste', handlePaste);
+    return () => document.removeEventListener('paste', handlePaste);
+  }, [editor]);
+
+  const handleInsertTableClick = () => {
+    setShowTableGrid(true);
+  };
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const view = editor.view;
+
+    const { state } = view;
+
+    const { $from } = state.selection;
+
+    console.log($from)
+
+    const dom = view.domAtPos($from.pos);
+    const cell = dom.node instanceof HTMLElement && dom.node.closest('td, th');
+  }, [editor])
+
+//   useEffect(() => {
+//   if (!editor) return;
+
+//   const updateControls = () => {
+    // const view = editor.view;
+    // const { state } = view;
+    // const { $from } = state.selection;
+
+//     const dom = view.domAtPos($from.pos);
+//     const cell = dom.node instanceof HTMLElement && dom.node.closest('td, th');
+
+//     if (cell) {
+//       const rect = cell.getBoundingClientRect();
+//       setCellPosition({
+//         top: rect.top + window.scrollY,
+//         left: rect.left + window.scrollX,
+//       });
+//     } else {
+//       setCellPosition(null);
+//     }
+//   };
+
+//   editor.on('selectionUpdate', updateControls);
+
+//   return () => {
+//     editor.off('selectionUpdate', updateControls);
+//   };
+// }, [editor]);
+
 
   return (
-    <>
-        <div className="toolbar">
-          <button onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'active' : ''}>
-            <b>Жирный</b>
-          </button>
-          <button onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'active' : ''}>
-            <i>Курсив</i>
-          </button>
-          <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive('heading', { level: 1 }) ? 'active' : ''}>
-            H1
-          </button>
-          <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive('heading', { level: 2 }) ? 'active' : ''}>
-            H2
-          </button>
-          <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? 'active' : ''}>
-            • List
-          </button>
-
-          <button onClick={() => setShowTableGrid(!showTableGrid)}>
-            📊 Вставить таблицу
-          </button>
-
-
-          <button onClick={() => editor.chain().focus().setImage({ src: 'https://via.placeholder.com/150' }).run()}>
-  🖼️ Вставить изображение
-</button>
-
-<button onClick={() => editor.chain().focus().toggleCode().run()}>
-  ` Инлайн код
-</button>
-
-<button onClick={() => editor.chain().focus().toggleCodeBlock().run()}>
-  📄 Блок кода
-</button>
-
-<button onClick={() => editor.chain().focus().toggleBlockquote().run()}>
-  ❝ Цитата
-</button>
-
-<button onClick={() => editor.chain().focus().setHorizontalRule().run()}>
-  ━ Горизонтальная линия
-</button>
-
-<button onClick={() => {
-  const url = prompt('Введите ссылку');
-  if (url) {
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-  }
-}}>
-  🔗 Вставить ссылку
-</button>
-        </div>
-
-
-{editor && editor.isActive('table') && (
-  <div className="table-toolbar">
-    <button onClick={() => editor.chain().focus().addRowBefore().run()}>
-      ➕ Строка выше
-    </button>
-    <button onClick={() => editor.chain().focus().addRowAfter().run()}>
-      ➕ Строка ниже
-    </button>
-    <button onClick={() => editor.chain().focus().addColumnBefore().run()}>
-      ➕ Колонка слева
-    </button>
-    <button onClick={() => editor.chain().focus().addColumnAfter().run()}>
-      ➕ Колонка справа
-    </button>
-    <button onClick={() => editor.chain().focus().deleteRow().run()}>
-      🗑️ Удалить строку
-    </button>
-    <button onClick={() => editor.chain().focus().deleteColumn().run()}>
-      🗑️ Удалить колонку
-    </button>
-    <button onClick={() => editor.chain().focus().deleteTable().run()}>
-      ❌ Удалить таблицу
-    </button>
-  </div>
-)}
-
-
-
-
-{/* сетка выбора размера таблицы */}
-{showTableGrid && (
-  <div
-    style={{
-      position: 'absolute',
-      top: 60, // под тулбаром
-      left: 0,
-      background: '#fff',
-      border: '1px solid #ccc',
-      padding: 8,
-      zIndex: 10,
-    }}
-    onMouseLeave={() => setShowTableGrid(false)}
-  >
-    <div style={{ marginBottom: 4 }}>
-      {gridSize.cols > 0 && gridSize.rows > 0 && (
-        <div>{gridSize.cols} × {gridSize.rows}</div>
+    <div className='editor-container'>
+      <Toolbar editor={editor} onInsertTable={handleInsertTableClick} />
+      {selectedText && popupPosition && (
+          <div style={{top: popupPosition?.top, left: popupPosition?.left}} className='selected-text__popup' title='Оставить комментарий'>
+            <MapsUgcOutlinedIcon />
+          </div>
       )}
-    </div>
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 20px)', gap: 2 }}>
-      {Array.from({ length: 100 }).map((_, i) => {
-        const x = (i % 10) + 1;
-        const y = Math.floor(i / 10) + 1;
-        const isActive = x <= gridSize.cols && y <= gridSize.rows;
-
-        return (
-          <div
-            key={i}
-            onMouseEnter={() => setGridSize({ cols: x, rows: y })}
-            onClick={() => {
-              editor.chain().focus().insertTable({
-                rows: gridSize.rows,
-                cols: gridSize.cols,
-                withHeaderRow: true,
-              }).run();
-              setShowTableGrid(false);
-              setGridSize({ cols: 0, rows: 0 });
-            }}
-            style={{
-              width: 20,
-              height: 20,
-              backgroundColor: isActive ? '#007bff' : '#eee',
-              border: '1px solid #ccc',
-              cursor: 'pointer',
-            }}
-          />
-        );
-      })}
-    </div>
-  </div>
-)}
 
 
 
 
 
-              {popupPosition && (
-        <div
-          ref={popupRef}
-          className="floating-popup"
-          style={{
-            top: popupPosition.top,
-            left: popupPosition.left,
+    {/* {cellPosition && (
+  <>
+    <button
+      className="table-btn insert-col-left"
+      style={{ top: cellPosition.top, left: cellPosition.left - 20 }}
+      onClick={() => editor?.chain().focus().addColumnBefore().run()}
+    >+Col←</button>
+
+    <button
+      className="table-btn insert-col-right"
+      style={{ top: cellPosition.top, left: cellPosition.left + 100 }}
+      onClick={() => editor?.chain().focus().addColumnAfter().run()}
+    >+Col→</button>
+
+    <button
+      className="table-btn insert-row-above"
+      style={{ top: cellPosition.top - 20, left: cellPosition.left + 40 }}
+      onClick={() => editor?.chain().focus().addRowBefore().run()}
+    >+Row↑</button>
+
+    <button
+      className="table-btn insert-row-below"
+      style={{ top: cellPosition.top + 40, left: cellPosition.left + 40 }}
+      onClick={() => editor?.chain().focus().addRowAfter().run()}
+    >+Row↓</button>
+  </>
+)} */}
+
+
+
+
+
+
+
+
+
+      {showTableGrid && (
+        <TableGridSelector
+          onSelect={(rows, cols) => {
+            editor?.chain().focus().insertTable({
+              rows,
+              cols,
+              withHeaderRow: true,
+            }).run();
           }}
-        >
-          <button onClick={() => console.log('Выделено:', selectedText)}>
-            🔍 Log selection
-          </button>
-        </div>
+          onClose={() => setShowTableGrid(false)}
+        />
       )}
-      
-    <div style={{ border: '1px solid #ccc', padding: 12 }}>
-      <EditorContent
-        editor={editor}
-        ref={editorRef}
-      />
+
+      <div className='editor-container-inner'>
+        <EditorContent editor={editor} ref={editorRef} onBlur={() => setSelectedText(null)} className='editor'/>
+      </div>
     </div>
-    </>
   );
 };
+
+export default SmartMarkdownEditor;

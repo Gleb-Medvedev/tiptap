@@ -1,3 +1,18 @@
+.editor {
+  padding: 10px 40px;
+  border-radius: 4;
+  border: 1px solid #666;
+}
+
+.editor-container {
+  position: relative;
+}
+
+.tiptap {
+  border: unset;
+  outline: unset;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -11,18 +26,20 @@ th {
   padding: 6px 10px;
   min-width: 50px;
   vertical-align: top;
-  
-    /* word-wrap: break-word;
-  overflow-wrap: break-word;
-  word-break: break-word;
-  white-space: pre-wrap; */
+
 }
 
 th {
   background-color: #f0f0f0;
+  position: relative;
+}
+
+th:focus-within {
+  background-color: red;
 }
 
 .table-toolbar {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -36,4 +53,87 @@ th {
   border: 1px solid #ccc;
   cursor: pointer;
   border-radius: 4px;
+}
+
+.table-btn {
+  position: absolute;
+  z-index: 20;
+  padding: 2px 6px;
+  font-size: 12px;
+  background: white;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+
+/* Basic Tiptap styles */
+.tiptap {
+  > * + * {
+    margin-top: 0.75em;
+  }
+
+  ul,
+  ol {
+    padding: 0 1rem;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+  }
+
+  h3 {
+    font-size: 1.17em;
+  }
+
+  pre {
+    background: #0d0d0d;
+    color: #fff;
+    font-family: "JetBrainsMono", monospace;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+  }
+
+  code {
+    background-color: rgba(97, 97, 97, 0.1);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+  }
+
+  blockquote {
+    padding-left: 1rem;
+    border-left: 2px solid #ddd;
+    color: #666;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+.selected-text__popup {
+  padding: .25rem;
+  border: 1px solid black;
+  border-radius: .5rem;
+  position: absolute;
+  transform: translate(-50%, -20%);
+  background-color: white;
+  z-index: 10;
+  box-shadow: 0 2px 8px #66666667;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+    z-index: 10;
+  }
 }
