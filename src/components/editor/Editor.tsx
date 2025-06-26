@@ -32,7 +32,7 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
     const [selectedText, setSelectedText] = useState<string | null>(null);
     const [showTableGrid, setShowTableGrid] = useState(false);
     const [popupPosition, setPopupPosition] = useState<{ top: number; left: number } | null>(null);
-    const [cellPosition, setCellPosition] = useState<{ top: number, left: number } | null>(null);
+    const [cellPosition, setCellPosition] = useState<{ top: number, left: number, width: number, height: number } | null>(null);
 
   const editor = useEditor({
     extensions: [StarterKit, Table.configure({
@@ -103,50 +103,55 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
     setShowTableGrid(true);
   };
 
+  // useEffect(() => {
+  //   if (!editor) return;
+
+  //   const view = editor.view;
+
+  //   const { state } = view;
+
+  //   const { $from } = state.selection;
+
+  //   const dom = view.domAtPos($from.pos);
+  //   const cell = dom.node instanceof HTMLElement && dom.node.closest('td, th');
+
+  //   console.log(dom)
+  //   console.log(cell)
+  // }, [editor])
+
   useEffect(() => {
-    if (!editor) return;
+  if (!editor) return;
 
+  const updateControls = () => {
     const view = editor.view;
-
     const { state } = view;
-
     const { $from } = state.selection;
-
-    console.log($from)
 
     const dom = view.domAtPos($from.pos);
     const cell = dom.node instanceof HTMLElement && dom.node.closest('td, th');
-  }, [editor])
 
-//   useEffect(() => {
-//   if (!editor) return;
+    if (cell) {
+      const rect = cell.getBoundingClientRect();
 
-//   const updateControls = () => {
-    // const view = editor.view;
-    // const { state } = view;
-    // const { $from } = state.selection;
+      console.log(rect)
 
-//     const dom = view.domAtPos($from.pos);
-//     const cell = dom.node instanceof HTMLElement && dom.node.closest('td, th');
+      setCellPosition({
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+        height: rect.height,
+      });
+    } else {
+      setCellPosition(null);
+    }
+  };
 
-//     if (cell) {
-//       const rect = cell.getBoundingClientRect();
-//       setCellPosition({
-//         top: rect.top + window.scrollY,
-//         left: rect.left + window.scrollX,
-//       });
-//     } else {
-//       setCellPosition(null);
-//     }
-//   };
+  editor.on('selectionUpdate', updateControls);
 
-//   editor.on('selectionUpdate', updateControls);
-
-//   return () => {
-//     editor.off('selectionUpdate', updateControls);
-//   };
-// }, [editor]);
-
+  return () => {
+    editor.off('selectionUpdate', updateControls);
+  };
+}, [editor]);
 
   return (
     <div className='editor-container'>
@@ -155,6 +160,13 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
           <div style={{top: popupPosition?.top, left: popupPosition?.left}} className='selected-text__popup' title='Оставить комментарий'>
             <MapsUgcOutlinedIcon />
           </div>
+      )}
+
+      {cellPosition && (
+        <>
+          <div style={{position: 'absolute', top: cellPosition.top, left: cellPosition.left - 50, height: cellPosition.height, width: '50px', backgroundColor: 'red', zIndex: 20}}></div>
+          <div style={{position: 'absolute', top: cellPosition.top, left: cellPosition.left + cellPosition.width, height: cellPosition.height, width: '50px', backgroundColor: 'green', zIndex: 20}}></div>
+        </>
       )}
 
 
