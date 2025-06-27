@@ -1,19 +1,19 @@
-import { useEffect, useRef, useState, type FC } from 'react';
+import { useState, type FC } from 'react';
 import './EditorTableSizePicker.css';
 import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
 
-interface TableGridSelectorProps {
+interface TableGridSizePickerPopupProps {
   onSelect: (rows: number, cols: number) => void;
   onClose: () => void;
 }
 
-const TableGridSelector: FC<TableGridSelectorProps> = ({ onSelect, onClose }) => {
+const TableGridSizePickerPopup: FC<TableGridSizePickerPopupProps> = ({ onSelect, onClose }) => {
   const [gridSize, setGridSize] = useState({ rows: 0, cols: 0 });
 
   return (
     <div
-        className='editor-table-picker'
-        onMouseLeave={onClose}
+      className='editor-table-picker'
+      onMouseLeave={onClose}
     >
       <div className='editor-table-picker__grid-size'>
         <span className='editor-table-picker__grid-size-text'>Размер таблицы: {gridSize.cols} <ClearOutlinedIcon fontSize='small' color='primary' /> {gridSize.rows}</span>
@@ -47,4 +47,4 @@ const TableGridSelector: FC<TableGridSelectorProps> = ({ onSelect, onClose }) =>
   );
 };
 
-export default TableGridSelector;
+export default TableGridSizePickerPopup;

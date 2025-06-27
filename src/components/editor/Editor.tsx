@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, type FC } from 'react';
+import { useEffect, useRef, useState, type FC } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Table from '@tiptap/extension-table'
@@ -7,58 +7,70 @@ import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
-import Blockquote from '@tiptap/extension-blockquote';
-import Code from '@tiptap/extension-code';
+// import Blockquote from '@tiptap/extension-blockquote';
+import Underline from '@tiptap/extension-underline';
+// import Code from '@tiptap/extension-code';
+import TextAlign from '@tiptap/extension-text-align';
 // import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import HorizontalRule from '@tiptap/extension-horizontal-rule';
+// import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import { generateHTML } from '@tiptap/html';
 import MarkdownIt from 'markdown-it';
 import TurndownService from 'turndown';
 import './Editor.css';
 import Toolbar from './EditorToolbar';
-import TableGridSelector from './EditorTablePicker';
+import TableGridSizePickerPopup from './TableGridSizePickerPopup';
 import MapsUgcOutlinedIcon from '@mui/icons-material/MapsUgcOutlined';
+import TableCellControls from './TableCellControls';
+import ToolbarButtonConfig from './EditorToolbar';
 
 const md = new MarkdownIt();
 const turndownService = new TurndownService();
 
 interface SmartMarkdownProps {
   onInsertTable?: () => void;
+  onClickTableCell?: () => void;
 }
+
+type PositionType = { top: number, left: number, width: number, height: number };
 
 const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
     const editorRef = useRef(null);
 
     const [selectedText, setSelectedText] = useState<string | null>(null);
-    const [showTableGrid, setShowTableGrid] = useState(false);
-    const [popupPosition, setPopupPosition] = useState<{ top: number; left: number } | null>(null);
-    const [cellPosition, setCellPosition] = useState<{ top: number, left: number, width: number, height: number } | null>(null);
+    const [showTableGrid, setShowTableGrid] = useState<boolean>(false);
+    const [selectedTextPopupPosition, setSelectedTextPopupPosition] = useState<Pick<PositionType, 'top' | 'left'> | null>(null);
+    const [selectedTableCellPosition, setSelectedCellPosition] = useState<PositionType | null>(null);
 
   const editor = useEditor({
-    extensions: [StarterKit, Table.configure({
+    extensions: [StarterKit, Underline, Table.configure({
       resizable: true,
+    }),
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
     }),
     Image,
     Link.configure({
       openOnClick: false,
     }),
-    Code,
-    Blockquote,
-    HorizontalRule,
     TableRow,
     TableHeader,
-    TableCell,  
+    TableCell,
+    // HorizontalRule,
   ],
     content: md.render(`# Привет! \n\n**Это жирный**, *а это курсивный* текст.`),
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       const markdown = turndownService.turndown(html);
     },
+    onBlur: () => {
+      setShowTableGrid(false);
+      setSelectedCellPosition(null);
+    },
     onSelectionUpdate: ({ editor }) => {
       const { from, to } = editor.state.selection;
 
       if (from === to || !editorRef.current) {
-        setPopupPosition(null);
+        setSelectedTextPopupPosition(null);
         setSelectedText(null);
         return;
       }
@@ -69,7 +81,7 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
 
-      setPopupPosition({
+      setSelectedTextPopupPosition({
         top: rect.top + window.scrollY - 40,
         left: rect.left + window.scrollX + rect.width / 2,
       });
@@ -103,26 +115,10 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
     setShowTableGrid(true);
   };
 
-  // useEffect(() => {
-  //   if (!editor) return;
-
-  //   const view = editor.view;
-
-  //   const { state } = view;
-
-  //   const { $from } = state.selection;
-
-  //   const dom = view.domAtPos($from.pos);
-  //   const cell = dom.node instanceof HTMLElement && dom.node.closest('td, th');
-
-  //   console.log(dom)
-  //   console.log(cell)
-  // }, [editor])
-
   useEffect(() => {
   if (!editor) return;
 
-  const updateControls = () => {
+  const showFocusedCellControls = () => {
     const view = editor.view;
     const { state } = view;
     const { $from } = state.selection;
@@ -133,89 +129,60 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
     if (cell) {
       const rect = cell.getBoundingClientRect();
 
-      console.log(rect)
-
-      setCellPosition({
+      setSelectedCellPosition({
         top: rect.top + window.scrollY,
         left: rect.left + window.scrollX,
         width: rect.width,
         height: rect.height,
       });
     } else {
-      setCellPosition(null);
+      setSelectedCellPosition(null);
     }
   };
 
-  editor.on('selectionUpdate', updateControls);
+  editor.on('selectionUpdate', showFocusedCellControls);
 
   return () => {
-    editor.off('selectionUpdate', updateControls);
+    editor.off('selectionUpdate', showFocusedCellControls);
   };
 }, [editor]);
+
+  const handleTableCellAction = (action: any) => {
+    switch (action) {
+      case 'add-column-left':
+        editor?.chain().focus().addColumnBefore().run();
+        break;
+      case 'add-column-right':
+        editor?.chain().focus().addColumnAfter().run();
+        break;
+      case 'add-row-top':
+        editor?.chain().focus().addRowBefore().run();
+        break;
+      case 'add-row-bottom':
+        editor?.chain().focus().addRowAfter().run();
+        break;
+    }
+  };
 
   return (
     <div className='editor-container'>
       <Toolbar editor={editor} onInsertTable={handleInsertTableClick} />
-      {selectedText && popupPosition && (
-          <div style={{top: popupPosition?.top, left: popupPosition?.left}} className='selected-text__popup' title='Оставить комментарий'>
+
+      {selectedText && selectedTextPopupPosition && (
+          <div style={{top: selectedTextPopupPosition?.top, left: selectedTextPopupPosition?.left}} className='selected-text__popup'>
             <MapsUgcOutlinedIcon />
           </div>
       )}
 
-      {cellPosition && (
-        <>
-          <div style={{position: 'absolute', top: cellPosition.top, left: cellPosition.left - 50, height: cellPosition.height, width: '50px', backgroundColor: 'red', zIndex: 20}}></div>
-          <div style={{position: 'absolute', top: cellPosition.top, left: cellPosition.left + cellPosition.width, height: cellPosition.height, width: '50px', backgroundColor: 'green', zIndex: 20}}></div>
-        </>
-      )}
-
-
-
-
-
-    {/* {cellPosition && (
-  <>
-    <button
-      className="table-btn insert-col-left"
-      style={{ top: cellPosition.top, left: cellPosition.left - 20 }}
-      onClick={() => editor?.chain().focus().addColumnBefore().run()}
-    >+Col←</button>
-
-    <button
-      className="table-btn insert-col-right"
-      style={{ top: cellPosition.top, left: cellPosition.left + 100 }}
-      onClick={() => editor?.chain().focus().addColumnAfter().run()}
-    >+Col→</button>
-
-    <button
-      className="table-btn insert-row-above"
-      style={{ top: cellPosition.top - 20, left: cellPosition.left + 40 }}
-      onClick={() => editor?.chain().focus().addRowBefore().run()}
-    >+Row↑</button>
-
-    <button
-      className="table-btn insert-row-below"
-      style={{ top: cellPosition.top + 40, left: cellPosition.left + 40 }}
-      onClick={() => editor?.chain().focus().addRowAfter().run()}
-    >+Row↓</button>
-  </>
-)} */}
-
-
-
-
-
-
-
-
+      {selectedTableCellPosition && <TableCellControls position={selectedTableCellPosition} addTableElemOnCLick={handleTableCellAction}/>}
 
       {showTableGrid && (
-        <TableGridSelector
+        <TableGridSizePickerPopup
           onSelect={(rows, cols) => {
             editor?.chain().focus().insertTable({
               rows,
               cols,
-              withHeaderRow: true,
+              withHeaderRow: false,
             }).run();
           }}
           onClose={() => setShowTableGrid(false)}

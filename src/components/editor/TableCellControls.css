@@ -1,0 +1,56 @@
+.table-cell-btn {
+    position: absolute;
+    z-index: 20;
+    width: 30px;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    border-width: 1px;
+    border-style: solid;
+    border-color: black;
+    opacity: .15;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.table-cell-btn:hover {
+    opacity: 1;
+    border-color: green;
+}
+
+.table-cell-btn:hover > div > svg {
+    fill: green;
+}
+
+.table-cell__btn-container {
+    width: 100%;
+    height: 100%;
+    padding: 2px;
+}
+
+.table-cell-btn_left {
+    transform: translate(-100%, -50%);
+}
+
+.table-cell-btn_right {
+    transform: translate(0, -50%);
+}
+
+.table-cell-btn_left > .table-cell__btn-container {
+    transform: rotate(90deg);
+}
+
+.table-cell-btn_right > .table-cell__btn-container {
+    transform: rotate(-90deg);
+}
+
+.table-cell-btn_top {
+    transform: translate(-50%, -100%);
+}
+
+.table-cell-btn_top > .table-cell__btn-container {
+    transform: rotate(180deg);
+}
+
+.table-cell-btn_bottom {
+    transform: translateX(-50%);
+}

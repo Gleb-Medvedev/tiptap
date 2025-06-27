@@ -1,6 +1,39 @@
 .toolbar-container {
+    position: relative;
+    display: grid;
+    gap: .5rem;
+}
+
+.toolbar-container,
+.secondary-buttons-container {
+    padding: 6px 26px;
+}
+
+.editor-toolbar__buttons-container,
+.table-buttons-container {
     display: flex;
     align-items: center;
+}
+
+.editor-toolbar__buttons-container,
+.table-buttons-container {
+    max-width: calc(100% - 120px);
+}
+
+ul {
+    display: flex;
+    list-style: none;
+}
+
+.secondary-buttons-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.toolbar-group,
+.editor-toolbar__buttons-container,
+.table-buttons__list,
+.table-buttons-container {
     gap: .25rem;
-    padding: 6px 40px; 
 }

@@ -1,7 +1,6 @@
 .editor {
-  padding: 10px 40px;
-  border-radius: 4;
-  border: 1px solid #666;
+  padding: 24px 40px 32px;
+  border-radius: 4px;
 }
 
 .editor-container {
@@ -17,7 +16,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
-    table-layout: fixed;
+  table-layout: fixed;
 }
 
 td,
@@ -26,16 +25,6 @@ th {
   padding: 6px 10px;
   min-width: 50px;
   vertical-align: top;
-
-}
-
-th {
-  background-color: #f0f0f0;
-  position: relative;
-}
-
-th:focus-within {
-  background-color: red;
 }
 
 .table-toolbar {

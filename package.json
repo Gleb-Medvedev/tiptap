@@ -21,6 +21,8 @@
     "@tiptap/extension-table-cell": "^2.22.3",
     "@tiptap/extension-table-header": "^2.22.3",
     "@tiptap/extension-table-row": "^2.22.3",
+    "@tiptap/extension-text-align": "^2.23.0",
+    "@tiptap/extension-underline": "^2.23.0",
     "@tiptap/html": "^2.22.3",
     "@tiptap/react": "^2.22.3",
     "@tiptap/starter-kit": "^2.22.3",
