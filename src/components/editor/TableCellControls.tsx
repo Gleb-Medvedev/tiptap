@@ -1,16 +1,11 @@
 import { type FC } from "react";
 import './TableCellControls.css';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
+import type { TableCellAction } from "./EditorToolbar";
 
 const MUI_BTN_STYLES = {
     fontSize: '24px',
 }
-
-type TableCellAction =
-  | 'add-column-left'
-  | 'add-column-right'
-  | 'add-row-top'
-  | 'add-row-bottom';
 
 interface TableCellControlsProps {
   position: { top: number; left: number; width: number; height: number } | null;

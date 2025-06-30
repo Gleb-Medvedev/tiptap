@@ -21,7 +21,7 @@ import Toolbar from './EditorToolbar';
 import TableGridSizePickerPopup from './TableGridSizePickerPopup';
 import MapsUgcOutlinedIcon from '@mui/icons-material/MapsUgcOutlined';
 import TableCellControls from './TableCellControls';
-import ToolbarButtonConfig from './EditorToolbar';
+import type { TableCellAction } from "./EditorToolbar";
 
 const md = new MarkdownIt();
 const turndownService = new TurndownService();
@@ -55,6 +55,7 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
     TableRow,
     TableHeader,
     TableCell,
+    // Blockquote,
     // HorizontalRule,
   ],
     content: md.render(`# Привет! \n\n**Это жирный**, *а это курсивный* текст.`),
@@ -147,26 +148,43 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
   };
 }, [editor]);
 
-  const handleTableCellAction = (action: any) => {
-    switch (action) {
-      case 'add-column-left':
-        editor?.chain().focus().addColumnBefore().run();
-        break;
-      case 'add-column-right':
-        editor?.chain().focus().addColumnAfter().run();
-        break;
-      case 'add-row-top':
-        editor?.chain().focus().addRowBefore().run();
-        break;
-      case 'add-row-bottom':
-        editor?.chain().focus().addRowAfter().run();
-        break;
-    }
-  };
+  const handleTableAction = (action: TableCellAction) => {
+  if (!editor) return;
+
+  switch (action) {
+    case 'add-column-left':
+      editor.chain().focus().addColumnBefore().run();
+      break;
+    case 'add-column-right':
+      editor.chain().focus().addColumnAfter().run();
+      break;
+    case 'delete-column':
+      editor.chain().focus().deleteColumn().run();
+      break;
+
+    case 'add-row-top':
+      editor.chain().focus().addRowBefore().run();
+      break;
+    case 'add-row-bottom':
+      editor.chain().focus().addRowAfter().run();
+      break;
+    case 'delete-row':
+      editor.chain().focus().deleteRow().run();
+      break;
+
+    case 'delete-table':
+      editor.chain().focus().deleteTable().run();
+      break;
+
+    default:
+      console.warn(`Несуществующая команда для таблицы!: ${action}`);
+  }
+};
+
 
   return (
     <div className='editor-container'>
-      <Toolbar editor={editor} onInsertTable={handleInsertTableClick} />
+      <Toolbar editor={editor} onInsertTable={handleInsertTableClick} onClickCellAction={handleTableAction} />
 
       {selectedText && selectedTextPopupPosition && (
           <div style={{top: selectedTextPopupPosition?.top, left: selectedTextPopupPosition?.left}} className='selected-text__popup'>
@@ -174,7 +192,7 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
           </div>
       )}
 
-      {selectedTableCellPosition && <TableCellControls position={selectedTableCellPosition} addTableElemOnCLick={handleTableCellAction}/>}
+      {selectedTableCellPosition && <TableCellControls position={selectedTableCellPosition} addTableElemOnCLick={handleTableAction}/>}
 
       {showTableGrid && (
         <TableGridSizePickerPopup

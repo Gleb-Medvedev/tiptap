@@ -20,7 +20,7 @@
     max-width: calc(100% - 120px);
 }
 
-ul {
+ul:not(.editor > div > ul) {
     display: flex;
     list-style: none;
 }
@@ -31,9 +31,53 @@ ul {
     right: 0;
 }
 
+.secondary-buttons__list-item {
+    height: 40px;
+    height: 40px;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+}
+
+.secondary-buttons__list-item > button {
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
 .toolbar-group,
 .editor-toolbar__buttons-container,
 .table-buttons__list,
 .table-buttons-container {
     gap: .25rem;
+}
+
+.table-buttons__icons-wrapper {
+    position: absolute;
+    inset: 0;
+    padding: 6px;
+}
+
+.table-button__inner-wrapper {
+    display: inline-block;
+    padding: 8px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.table-button__icon-container {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+}
+
+.table-button__secondary-text {
+    display: inline-block;
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }

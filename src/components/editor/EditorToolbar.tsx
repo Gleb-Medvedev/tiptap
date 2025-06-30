@@ -13,13 +13,27 @@ import StrikethroughSOutlinedIcon from '@mui/icons-material/StrikethroughSOutlin
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BorderAllIcon from '@mui/icons-material/BorderAll';
-import BorderTopIcon from '@mui/icons-material/BorderTop';
-import BorderBottomIcon from '@mui/icons-material/BorderBottom';
-import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
+import AddIcon from '@mui/icons-material/Add';
 import Crop169Icon from '@mui/icons-material/Crop169';
 import { Editor } from '@tiptap/react';
 import { useState, type FC, type ReactNode } from 'react';
 import './EditorToolbar.css'
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import GridOffOutlinedIcon from '@mui/icons-material/GridOffOutlined';
+
+// const MUI_TOOLBAR_BTNS_STYLES = () => {
+//     backgroundColor: (isActive: boolean) => isActive ? 'blue' : 'transparent',
+//     color: (isActive: boolean) => isActive ? 'white' : 'default',
+// }
+
+const MUI_TOOLBAR_BTNS_STYLES = (isActive: boolean) => ({
+  backgroundColor: isActive ? 'blue' : 'transparent',
+  color: isActive ? 'white' : 'default',
+});
+
+const MUI_TABLE_BTNS_STYLES = {
+  fontSize: 'medium',
+} as const;
 
 const MUI_SELECT_STYLES = {
     '& .MuiOutlinedInput-notchedOutline': {
@@ -41,13 +55,13 @@ type HeadingLevels = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface ToolbarButtonConfigBase {
   label: string;
+  keyCommandText?: string,
   action?: 'mark' | 'node' | 'alignment' | 'custom';
   actionValue: string;
   icon: ReactNode;
-  secondaryText?: string;
 }
 
-type SelectButtonConfig = {
+type SelectOptionConfig = {
   label: string;
   action: string;
   selectOptions: {
@@ -57,7 +71,7 @@ type SelectButtonConfig = {
   }[];
 };
 
-export type ToolbarButtonConfig = ToolbarButtonConfigBase | SelectButtonConfig;
+export type ToolbarButtonConfig = ToolbarButtonConfigBase | SelectOptionConfig;
 
 export const TOOLBAR_GROUPS_CONFIG: ToolbarButtonConfig[][] = [
   // форматирование текста
@@ -154,7 +168,7 @@ type ToolbarSecondaryButtonsConfig = Pick<ToolbarButtonConfigBase, 'label' | 'ic
 
 const TOOLBAR_SECONDARY_BUTTONS: ToolbarSecondaryButtonsConfig[] = [
   {
-    icon: <HelpOutlineIcon />,
+    icon: <HelpOutlineIcon cursor={'help'}/>,
     label: 'Помощь',
   },
   {
@@ -163,88 +177,76 @@ const TOOLBAR_SECONDARY_BUTTONS: ToolbarSecondaryButtonsConfig[] = [
   }
 ];
 
-// type TableButtonsConfig = Omit<ToolbarButtonConfig>
+interface ToolbarTableBtnsConfig extends ToolbarButtonConfigBase {
+  additionalIcon?: ReactNode,
+}
 
-const TOOLBAR_TABLE_BUTTONS: ToolbarButtonConfigBase[][] = [
+export type TableCellAction =
+  | 'add-column-left'
+  | 'add-column-right'
+  | 'delete-column'
+  | 'add-row-top'
+  | 'add-row-bottom'
+  | 'delete-row'
+  | 'delete-table';
+
+const TOOLBAR_TABLE_BUTTONS: ToolbarTableBtnsConfig[][] = [
   [
     {
       label: 'Добавить столбец слева',
-      actionValue: 'addRowBefore',
-      icon: <Crop169Icon sx={{ transform: 'rotate(90deg)'}} />,
-      secondaryText: '+',
+      actionValue: 'add-column-left',
+      icon: <Crop169Icon />,
+      additionalIcon: <AddIcon sx={MUI_TABLE_BTNS_STYLES} />,
     },
       {
       label: 'Добавить столбец справа',
-      actionValue: 'addRowAfter',
-      icon: <Crop169Icon sx={{ transform: 'rotate(90deg)'}} />,
-      secondaryText: '+',
+      actionValue: 'add-column-right',
+      icon: <Crop169Icon />,
+      additionalIcon: <AddIcon sx={MUI_TABLE_BTNS_STYLES} />,
     },
       {
       label: 'Удалить выделенный столбец',
-      actionValue: 'addRowBefore',
-      icon: <Crop169Icon sx={{ transform: 'rotate(90deg)'}} />,
-      secondaryText: '-',
+      actionValue: 'delete-column',
+      icon: <Crop169Icon />,
+      additionalIcon: <CloseOutlinedIcon />,
     },
   ],
   [
         {
       label: 'Добавить строку сверху',
-      actionValue: 'addRowBefore',
+      actionValue: 'add-row-top',
       icon: <Crop169Icon />,
-      secondaryText: '+',
+      additionalIcon: <AddIcon sx={MUI_TABLE_BTNS_STYLES} />,
     },
       {
       label: 'Добавить строку снизу',
-      actionValue: 'addRowAfter',
+      actionValue: 'add-row-bottom',
       icon: <Crop169Icon />,
-      secondaryText: '+',
+      additionalIcon: <AddIcon sx={MUI_TABLE_BTNS_STYLES} />,
     },
       {
       label: 'Удалить выделенную строку',
-      actionValue: 'addRowBefore',
+      actionValue: 'delete-row',
       icon: <Crop169Icon />,
-      secondaryText: '-',
+      additionalIcon: <CloseOutlinedIcon />,
     },
   ],
   [
     {
-      label: 'Удалить текущую страницу',
-      actionValue: 'CHTO-to',
-      icon: <PlaylistRemoveIcon />,
+      label: 'Удалить текущую таблицу',
+      actionValue: 'delete-table',
+      icon: <GridOffOutlinedIcon />,
     }
   ]
-]
-
-
-
-
-  // const handleTableCellAction = (action: any) => {
-  //   switch (action) {
-  //     case 'add-column-left':
-  //       editor?.chain().focus().addColumnBefore().run();
-  //       break;
-  //     case 'add-column-right':
-  //       editor?.chain().focus().addColumnAfter().run();
-  //       break;
-  //     case 'add-row-top':
-  //       editor?.chain().focus().addRowBefore().run();
-  //       break;
-  //     case 'add-row-bottom':
-  //       editor?.chain().focus().addRowAfter().run();
-  //       break;
-  //   }
-  // };
-
-
-
-
+];
 
 interface ToolbarProps {
     editor: Editor | null;
     onInsertTable?: () => void;
+    onClickCellAction?: (actionValue: TableCellAction) => void;
 }
 
-const Toolbar: FC<ToolbarProps> = ({editor, onInsertTable}) => {
+const Toolbar: FC<ToolbarProps> = ({editor, onInsertTable, onClickCellAction}) => {
     const [currentHeadingLever, setCurrentHeadingLevel] = useState<HeadingLevels>(0);
 
     const handleHeadingChange = (level: HeadingLevels) => {
@@ -292,13 +294,43 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
   }
 };
 
+  const renderTableBtnIcon = (tableGroupIndex: number, btnConfig: ToolbarTableBtnsConfig, tableBtnIndex: number) => {
+    return (
+        <span className='table-button__inner-wrapper'>
+          <span className='table-button__icon-container' style={{transform: tableGroupIndex === 0 ? 'rotate(90deg)' : 'unset'}}>
+            {btnConfig.icon}
+          </span>
+
+          {tableGroupIndex === 0 && btnConfig.additionalIcon && <span className='table-button__secondary-text' style={{color: editor?.isActive('table') ? tableBtnIndex !== 2 ? 'green' : 'red' : '#666', left: tableBtnIndex === 0 ? '20%' : tableBtnIndex !== 2 ? '80%' : '50%', top: tableBtnIndex === 2 ? '55%' : '50%' }}>{btnConfig.additionalIcon}</span>}
+          {tableGroupIndex === 1 && btnConfig.additionalIcon && <span className='table-button__secondary-text' style={{color: editor?.isActive('table') ? tableBtnIndex !== 2 ? 'green' : 'red' : '#666', top: tableBtnIndex === 0 ? '20%' : tableBtnIndex !== 2 ? '80%' : '55%' }}>{btnConfig.additionalIcon}</span>}
+      </span>
+    )
+  }
+
     return (
         <div className='toolbar-container'>
           <div className='editor-toolbar__buttons-container'>
-              {TOOLBAR_GROUPS_CONFIG.map((group, groupIndex: number) => (
+              {TOOLBAR_GROUPS_CONFIG.map((group: ToolbarButtonConfig[], groupIndex: number) => (
               <ul key={`Group-${groupIndex}`} className='toolbar-group' style={{ marginRight: groupIndex === TOOLBAR_GROUPS_CONFIG.length -1 ? '40px' : 'unset' }}>
-                {group.map((btnConfig, configIndex: number) => (
-                  <li key={`Btn-${configIndex}`} className='toolbar-group__item'>
+                {group.map((btnConfig: ToolbarButtonConfig, configIndex: number) => {
+
+                  const isActive = (() => {
+                    if (!editor || !('actionValue' in btnConfig)) return false;
+
+                    switch (btnConfig.action) {
+                      case 'mark':
+                        return editor.isActive(btnConfig.actionValue);
+                      case 'node':
+                        return editor.isActive(btnConfig.actionValue);
+                      case 'alignment':
+                        return editor.isActive({ textAlign: btnConfig.actionValue });
+                      default:
+                        return false;
+                    }
+                  })();                  
+
+                  return (
+                    <li key={`Btn-${configIndex}`} className='toolbar-group__item'>
                     {'selectOptions' in btnConfig ? (
                       <Select
                         title={btnConfig.label}
@@ -315,6 +347,7 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
                             key={option.optionTitle}
                             title={option.optionTitle}
                             value={option.level}
+                            disableRipple
                           >
                             <Typography sx={{ fontSize: `${20 - (optionIndex + 1)}px` }}>
                               {option.optionTitle}
@@ -326,12 +359,16 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
                       <IconButton
                         title={btnConfig.label}
                         onMouseDown={() => handleButtonClick(btnConfig)}
+                        disableRipple
+                        sx={MUI_TOOLBAR_BTNS_STYLES(isActive)}
                       >
                         {btnConfig.icon}
                       </IconButton>
                     )}
                   </li>
-                ))}
+                  )
+                }
+                )}
                 {groupIndex !== TOOLBAR_GROUPS_CONFIG.length - 1 && <Divider orientation='vertical' flexItem sx={{ opacity: .6, backgroundColor: '#666' }} />}
               </ul>
           ))}
@@ -343,6 +380,7 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
               <li key={`Secondary-button-${index}`} className='secondary-buttons__list-item'>
                 <IconButton
                   title={secondaryButton.label}
+                  disableRipple
                 >
                   {secondaryButton.icon}
                 </IconButton>
@@ -352,22 +390,23 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
           </div>
 
           <div className='table-buttons-container'>
-            {/* <ul className="table-buttons__list"> */}
               {TOOLBAR_TABLE_BUTTONS.map((buttonGroup, groupIndex) => (
                 <ul key={`Table-group-${groupIndex}`} className="table-buttons__list">
-                  {buttonGroup.map((buttonConfig, index) => (
-                    <li key={`Table-button-${index}`} className='secondary-buttons__list-item'>
+                  {buttonGroup.map((buttonConfig, btnIndex) => (
+                    <li key={`Table-button-${btnIndex}`} className='secondary-buttons__list-item'>
                       <IconButton
                         title={buttonConfig.label}
+                        onClick={() => onClickCellAction!(buttonConfig.actionValue as TableCellAction)}
+                        disabled={!editor?.isActive('table')}
+                        disableRipple
                       >
-                        <span>{buttonConfig.secondaryText}{buttonConfig.icon}</span>
+                        {renderTableBtnIcon(groupIndex, buttonConfig, btnIndex)}
                       </IconButton>
                     </li>
                   ))}
-                  {groupIndex !== TOOLBAR_GROUPS_CONFIG.length - 1 && <Divider orientation='vertical' flexItem sx={{ opacity: .6, backgroundColor: '#666' }} />}
+                  {groupIndex !== TOOLBAR_TABLE_BUTTONS.length - 1 && <Divider orientation='vertical' flexItem sx={{ opacity: .6, backgroundColor: '#666' }} />}
                 </ul>
               ) )}
-            {/* </ul> */}
           </div>
         </div>
     )
