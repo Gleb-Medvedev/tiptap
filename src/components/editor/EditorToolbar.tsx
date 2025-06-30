@@ -20,11 +20,7 @@ import { useState, type FC, type ReactNode } from 'react';
 import './EditorToolbar.css'
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import GridOffOutlinedIcon from '@mui/icons-material/GridOffOutlined';
-
-// const MUI_TOOLBAR_BTNS_STYLES = () => {
-//     backgroundColor: (isActive: boolean) => isActive ? 'blue' : 'transparent',
-//     color: (isActive: boolean) => isActive ? 'white' : 'default',
-// }
+import ToolbarButtonTooltip from './ButtonsTooltip';
 
 const MUI_TOOLBAR_BTNS_STYLES = (isActive: boolean) => ({
   backgroundColor: isActive ? 'blue' : 'transparent',
@@ -55,7 +51,7 @@ type HeadingLevels = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface ToolbarButtonConfigBase {
   label: string;
-  keyCommandText?: string,
+  keyCommand?: string,
   action?: 'mark' | 'node' | 'alignment' | 'custom';
   actionValue: string;
   icon: ReactNode;
@@ -78,24 +74,28 @@ export const TOOLBAR_GROUPS_CONFIG: ToolbarButtonConfig[][] = [
   [
     {
       label: 'Жирный текст',
+      keyCommand: 'B',
       action: 'mark',
       actionValue: 'bold',
       icon: <FormatBoldIcon />,
     },
     {
       label: 'Курсив',
+      keyCommand: 'I',
       action: 'mark',
       actionValue: 'italic',
       icon: <FormatItalicIcon />,
     },
     {
       label: 'Подчёркнутый текст',
+      keyCommand: 'U',
       action: 'mark',
       actionValue: 'underline',
       icon: <FormatUnderlinedIcon />,
     },
     {
       label: 'Зачеркнутый текст',
+      keyCommand: 'S',
       action: 'mark',
       actionValue: 'strike',
       icon: <StrikethroughSOutlinedIcon />,
@@ -313,7 +313,6 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
               {TOOLBAR_GROUPS_CONFIG.map((group: ToolbarButtonConfig[], groupIndex: number) => (
               <ul key={`Group-${groupIndex}`} className='toolbar-group' style={{ marginRight: groupIndex === TOOLBAR_GROUPS_CONFIG.length -1 ? '40px' : 'unset' }}>
                 {group.map((btnConfig: ToolbarButtonConfig, configIndex: number) => {
-
                   const isActive = (() => {
                     if (!editor || !('actionValue' in btnConfig)) return false;
 
@@ -332,16 +331,16 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
                   return (
                     <li key={`Btn-${configIndex}`} className='toolbar-group__item'>
                     {'selectOptions' in btnConfig ? (
-                      <Select
-                        title={btnConfig.label}
-                        value={currentHeadingLever}
-                        sx={MUI_SELECT_STYLES}
-                        name='headings-select'
-                        onChange={(e) => {
-                          setCurrentHeadingLevel(e.target.value);
-                          handleHeadingChange(e.target.value);
-                        }}
-                      >
+                      <ToolbarButtonTooltip {...btnConfig}>
+                        <Select
+                          value={currentHeadingLever}
+                          sx={MUI_SELECT_STYLES}
+                          name='headings-select'
+                          onChange={(e) => {
+                            setCurrentHeadingLevel(e.target.value);
+                            handleHeadingChange(e.target.value);
+                          }}
+                        >
                         {btnConfig.selectOptions.map((option, optionIndex) => (
                           <MenuItem
                             key={option.optionTitle}
@@ -355,15 +354,17 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
                           </MenuItem>
                         ))}
                       </Select>
+                      </ToolbarButtonTooltip>
                     ) : (
-                      <IconButton
-                        title={btnConfig.label}
-                        onMouseDown={() => handleButtonClick(btnConfig)}
-                        disableRipple
-                        sx={MUI_TOOLBAR_BTNS_STYLES(isActive)}
-                      >
+                      <ToolbarButtonTooltip {...btnConfig}>
+                        <IconButton
+                          onMouseDown={() => handleButtonClick(btnConfig)}
+                          disableRipple
+                          sx={MUI_TOOLBAR_BTNS_STYLES(isActive)}
+                        >
                         {btnConfig.icon}
                       </IconButton>
+                      </ToolbarButtonTooltip>
                     )}
                   </li>
                   )
@@ -378,12 +379,13 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
             <ul className='secondary-buttons__list'>
             {TOOLBAR_SECONDARY_BUTTONS.map((secondaryButton, index) =>
               <li key={`Secondary-button-${index}`} className='secondary-buttons__list-item'>
-                <IconButton
-                  title={secondaryButton.label}
-                  disableRipple
-                >
+                <ToolbarButtonTooltip {...secondaryButton}>
+                  <IconButton
+                    disableRipple
+                  >
                   {secondaryButton.icon}
                 </IconButton>
+                </ToolbarButtonTooltip>
               </li>
             )}
             </ul>
@@ -394,14 +396,15 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
                 <ul key={`Table-group-${groupIndex}`} className="table-buttons__list">
                   {buttonGroup.map((buttonConfig, btnIndex) => (
                     <li key={`Table-button-${btnIndex}`} className='secondary-buttons__list-item'>
-                      <IconButton
-                        title={buttonConfig.label}
-                        onClick={() => onClickCellAction!(buttonConfig.actionValue as TableCellAction)}
-                        disabled={!editor?.isActive('table')}
-                        disableRipple
-                      >
+                      <ToolbarButtonTooltip {...buttonConfig}>
+                        <IconButton
+                          onClick={() => onClickCellAction!(buttonConfig.actionValue as TableCellAction)}
+                          disabled={!editor?.isActive('table')}
+                          disableRipple
+                        >
                         {renderTableBtnIcon(groupIndex, buttonConfig, btnIndex)}
                       </IconButton>
+                      </ToolbarButtonTooltip>
                     </li>
                   ))}
                   {groupIndex !== TOOLBAR_TABLE_BUTTONS.length - 1 && <Divider orientation='vertical' flexItem sx={{ opacity: .6, backgroundColor: '#666' }} />}

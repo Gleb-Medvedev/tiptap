@@ -2,6 +2,7 @@ import { type FC } from "react";
 import './TableCellControls.css';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import type { TableCellAction } from "./EditorToolbar";
+import ToolbarButtonTooltip from "./ButtonsTooltip";
 
 const MUI_BTN_STYLES = {
     fontSize: '24px',
