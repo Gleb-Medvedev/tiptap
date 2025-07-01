@@ -21,6 +21,13 @@ import './EditorToolbar.css'
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import GridOffOutlinedIcon from '@mui/icons-material/GridOffOutlined';
 import ToolbarButtonTooltip from './ButtonsTooltip';
+import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined';
+import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
+import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
+
+import FormatQuoteOutlinedIcon from '@mui/icons-material/FormatQuoteOutlined';
+
+import DrawOutlinedIcon from '@mui/icons-material/DrawOutlined';
 
 const MUI_TOOLBAR_BTNS_STYLES = (isActive: boolean) => ({
   backgroundColor: isActive ? 'blue' : 'transparent',
@@ -49,10 +56,12 @@ const MUI_SELECT_STYLES = {
 
 type HeadingLevels = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
+type ToolbarButtonActionValues = 'mark' | 'node' | 'alignment' | 'custom';
+
 export interface ToolbarButtonConfigBase {
   label: string;
-  keyCommand?: string,
-  action?: 'mark' | 'node' | 'alignment' | 'custom';
+  additionalInfo?: string,
+  action?: ToolbarButtonActionValues;
   actionValue: string;
   icon: ReactNode;
 }
@@ -69,33 +78,33 @@ type SelectOptionConfig = {
 
 export type ToolbarButtonConfig = ToolbarButtonConfigBase | SelectOptionConfig;
 
-export const TOOLBAR_GROUPS_CONFIG: ToolbarButtonConfig[][] = [
+const TOOLBAR_GROUPS_CONFIG: ToolbarButtonConfig[][] = [
   // форматирование текста
   [
     {
       label: 'Жирный текст',
-      keyCommand: 'B',
+      additionalInfo: 'CTRL + B',
       action: 'mark',
       actionValue: 'bold',
       icon: <FormatBoldIcon />,
     },
     {
       label: 'Курсив',
-      keyCommand: 'I',
+      additionalInfo: 'CTRL + I',
       action: 'mark',
       actionValue: 'italic',
       icon: <FormatItalicIcon />,
     },
     {
       label: 'Подчёркнутый текст',
-      keyCommand: 'U',
+      additionalInfo: 'CTRL + U',
       action: 'mark',
       actionValue: 'underline',
       icon: <FormatUnderlinedIcon />,
     },
     {
       label: 'Зачеркнутый текст',
-      keyCommand: 'S',
+      additionalInfo: 'CTRL + Shift + S',
       action: 'mark',
       actionValue: 'strike',
       icon: <StrikethroughSOutlinedIcon />,
@@ -162,11 +171,106 @@ export const TOOLBAR_GROUPS_CONFIG: ToolbarButtonConfig[][] = [
       icon: <FormatAlignRightOutlinedIcon />,
     },
   ],
+  //Цитата
+  [
+    {
+      label: 'Цитата',
+      action: 'node',
+      actionValue: 'blockquote',
+      icon: <FormatQuoteOutlinedIcon />,
+      additionalInfo: 'CTRL + SHIFT + B'
+    }
+  ],
+  [
+    {
+      label: 'Ссылка',
+      action: 'mark',
+      actionValue: 'link',
+      additionalInfo: 'CTRL + SHIFT + L',
+      icon: <LinkOutlinedIcon />,
+    }
+  ],
+  [
+    {
+      label: 'Однострочный код',
+      action: 'mark',
+      actionValue: 'code',
+      additionalInfo: 'пока хз',
+      icon: <CodeOutlinedIcon />,
+    },
+    {
+      label: 'Многострочный код',
+      action: 'node',
+      actionValue: 'codeBlock',
+      additionalInfo: 'тоже хз',
+      icon: <DataObjectOutlinedIcon />,
+    }
+  ]
 ];
 
-type ToolbarSecondaryButtonsConfig = Pick<ToolbarButtonConfigBase, 'label' | 'icon'>;
+//столбец слева
+{/* <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <rect x="10" y="4" width="4" height="16" rx="1" ry="1" stroke="currentColor" />
+  <g className="icon-modifier" stroke="currentColor">
+    <line x1="4" y1="12" x2="8" y2="12" />
+    <line x1="6" y1="10" x2="6" y2="14" />
+  </g>
+</svg> */}
+
+//столбец справа
+{/* <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <rect x="10" y="4" width="4" height="16" rx="1" ry="1" stroke="currentColor" />
+  <g className="icon-modifier" stroke="currentColor">
+    <line x1="20" y1="12" x2="16" y2="12" />
+    <line x1="18" y1="10" x2="18" y2="14" />
+  </g>
+</svg> */}
+
+//удалить столбец
+{/* <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <rect x="10" y="4" width="4" height="16" rx="1" ry="1" stroke="currentColor" />
+  <g className="icon-modifier" stroke="currentColor">
+    <line x1="6" y1="12" x2="18" y2="12" />
+  </g>
+</svg> */}
+
+
+//строка сверху
+{/* <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <rect x="4" y="10" width="16" height="4" rx="1" ry="1" stroke="currentColor" />
+  <g className="icon-modifier" stroke="currentColor">
+    <line x1="12" y1="4" x2="12" y2="8" />
+    <line x1="10" y1="6" x2="14" y2="6" />
+  </g>
+</svg> */}
+
+//строка снизу
+{/* <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <rect x="4" y="10" width="16" height="4" rx="1" ry="1" stroke="currentColor" />
+  <g className="icon-modifier" stroke="currentColor">
+    <line x1="12" y1="20" x2="12" y2="16" />
+    <line x1="10" y1="18" x2="14" y2="18" />
+  </g>
+</svg> */}
+
+// удалить строку
+{/* <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <rect x="4" y="10" width="16" height="4" rx="1" ry="1" stroke="currentColor" />
+  <g className="icon-modifier" stroke="currentColor">
+    <line x1="6" y1="12" x2="18" y2="12" />
+  </g>
+</svg> */}
+
+type ToolbarSecondaryButtonsConfig = Omit<ToolbarButtonConfigBase, 'actionValue'> & {actionValue?: string};
 
 const TOOLBAR_SECONDARY_BUTTONS: ToolbarSecondaryButtonsConfig[] = [
+  {
+    icon: <DrawOutlinedIcon />,
+    label: 'Редактор диаграмм',
+    additionalInfo: 'Откроется поверх окна',
+    action: 'custom',
+    actionValue: 'openModal',
+  },
   {
     icon: <HelpOutlineIcon cursor={'help'}/>,
     label: 'Помощь',
@@ -174,7 +278,7 @@ const TOOLBAR_SECONDARY_BUTTONS: ToolbarSecondaryButtonsConfig[] = [
   {
     icon: <SettingsIcon />,
     label: 'Настройки',
-  }
+  },
 ];
 
 interface ToolbarTableBtnsConfig extends ToolbarButtonConfigBase {
@@ -212,7 +316,7 @@ const TOOLBAR_TABLE_BUTTONS: ToolbarTableBtnsConfig[][] = [
     },
   ],
   [
-        {
+    {
       label: 'Добавить строку сверху',
       actionValue: 'add-row-top',
       icon: <Crop169Icon />,
@@ -244,9 +348,10 @@ interface ToolbarProps {
     editor: Editor | null;
     onInsertTable?: () => void;
     onClickCellAction?: (actionValue: TableCellAction) => void;
+    onCLickCloseModal?: () => void;
 }
 
-const Toolbar: FC<ToolbarProps> = ({editor, onInsertTable, onClickCellAction}) => {
+const Toolbar: FC<ToolbarProps> = ({editor, onInsertTable, onClickCellAction, onCLickCloseModal}) => {
     const [currentHeadingLever, setCurrentHeadingLevel] = useState<HeadingLevels>(0);
 
     const handleHeadingChange = (level: HeadingLevels) => {
@@ -268,14 +373,28 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
 
   switch (btn.action) {
     case 'mark':
+      if (actionValue === 'link') {
+        const linkUrl = window.prompt('Введите ссылку');
+        if (!linkUrl) return;
+          setTimeout(() => {
+            editor
+              .chain()
+              .focus()
+              .extendMarkRange('link')
+              .setLink({ href: linkUrl })
+              .run();
+          }, 0);
+      }
       editor.chain().focus().toggleMark(actionValue).run();
       break;
 
     case 'node':
       if (actionValue === 'orderedList') {
         editor.chain().focus().toggleOrderedList().run();
-      } else {
+      } else if (actionValue === 'bulletList') {
         editor.chain().focus().toggleBulletList().run();
+      } else if (actionValue === 'blockquote') {
+        editor.chain().focus().toggleBlockquote().run();
       }
       break;
 
@@ -286,6 +405,8 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
     case 'custom':
       if (actionValue === 'insertTable') {
         onInsertTable?.();
+      } else if (actionValue === 'openModal') {
+        onCLickCloseModal?.();
       }
       break;
 
@@ -377,11 +498,13 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
           <Divider />
           <div className='secondary-buttons-container'>
             <ul className='secondary-buttons__list'>
-            {TOOLBAR_SECONDARY_BUTTONS.map((secondaryButton, index) =>
+            {TOOLBAR_SECONDARY_BUTTONS.map((secondaryButton, index: number) =>
               <li key={`Secondary-button-${index}`} className='secondary-buttons__list-item'>
                 <ToolbarButtonTooltip {...secondaryButton}>
                   <IconButton
                     disableRipple
+                    // todo пофиксить типы
+                    onMouseDown={() => handleButtonClick(secondaryButton as ToolbarButtonConfig)}
                   >
                   {secondaryButton.icon}
                 </IconButton>
@@ -397,13 +520,15 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
                   {buttonGroup.map((buttonConfig, btnIndex) => (
                     <li key={`Table-button-${btnIndex}`} className='secondary-buttons__list-item'>
                       <ToolbarButtonTooltip {...buttonConfig}>
-                        <IconButton
-                          onClick={() => onClickCellAction!(buttonConfig.actionValue as TableCellAction)}
-                          disabled={!editor?.isActive('table')}
-                          disableRipple
-                        >
-                        {renderTableBtnIcon(groupIndex, buttonConfig, btnIndex)}
-                      </IconButton>
+                        {/* <div> */}
+                          <IconButton
+                            onClick={() => onClickCellAction!(buttonConfig.actionValue as TableCellAction)}
+                            disabled={!editor?.isActive('table')}
+                            disableRipple
+                          >
+                            {renderTableBtnIcon(groupIndex, buttonConfig, btnIndex)}
+                          </IconButton>
+                        {/* </div> */}
                       </ToolbarButtonTooltip>
                     </li>
                   ))}

@@ -21,6 +21,7 @@ import Toolbar from './EditorToolbar';
 import TableGridSizePickerPopup from './TableGridSizePickerPopup';
 import MapsUgcOutlinedIcon from '@mui/icons-material/MapsUgcOutlined';
 import TableCellControls from './TableCellControls';
+import Modal from './Modal';
 import type { TableCellAction } from "./EditorToolbar";
 
 const md = new MarkdownIt();
@@ -40,6 +41,7 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
     const [showTableGrid, setShowTableGrid] = useState<boolean>(false);
     const [selectedTextPopupPosition, setSelectedTextPopupPosition] = useState<Pick<PositionType, 'top' | 'left'> | null>(null);
     const [selectedTableCellPosition, setSelectedCellPosition] = useState<PositionType | null>(null);
+    const [modalState, setModalState] = useState<boolean>(false);
 
   const editor = useEditor({
     extensions: [StarterKit, Underline, Table.configure({
@@ -51,6 +53,8 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
     Image,
     Link.configure({
       openOnClick: false,
+      autolink: true,
+      linkOnPaste: true,
     }),
     TableRow,
     TableHeader,
@@ -181,18 +185,23 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
   }
 };
 
+const toggleModalState = () => {
+  setModalState(prev => !prev);
+}
 
   return (
     <div className='editor-container'>
-      <Toolbar editor={editor} onInsertTable={handleInsertTableClick} onClickCellAction={handleTableAction} />
+      <Toolbar editor={editor} onInsertTable={handleInsertTableClick} onClickCellAction={handleTableAction} onCLickCloseModal={() => setModalState(true)}/>
+
+      {modalState && <Modal onClose={toggleModalState} />}
 
       {selectedText && selectedTextPopupPosition && (
-          <div style={{top: selectedTextPopupPosition?.top, left: selectedTextPopupPosition?.left}} className='selected-text__popup'>
-            <MapsUgcOutlinedIcon />
-          </div>
+        <div style={{ top: selectedTextPopupPosition?.top, left: selectedTextPopupPosition?.left }} className='selected-text__popup'>
+          <MapsUgcOutlinedIcon />
+        </div>
       )}
 
-      {selectedTableCellPosition && <TableCellControls position={selectedTableCellPosition} addTableElemOnCLick={handleTableAction}/>}
+      {selectedTableCellPosition && <TableCellControls position={selectedTableCellPosition} addTableElemOnCLick={handleTableAction} />}
 
       {showTableGrid && (
         <TableGridSizePickerPopup
@@ -202,13 +211,12 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
               cols,
               withHeaderRow: false,
             }).run();
-          }}
-          onClose={() => setShowTableGrid(false)}
-        />
+          } }
+          onClose={() => setShowTableGrid(false)} />
       )}
 
       <div className='editor-container-inner'>
-        <EditorContent editor={editor} ref={editorRef} onBlur={() => setSelectedText(null)} className='editor'/>
+        <EditorContent editor={editor} ref={editorRef} onBlur={() => setSelectedText(null)} className='editor' />
       </div>
     </div>
   );

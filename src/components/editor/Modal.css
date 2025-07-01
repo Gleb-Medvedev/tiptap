@@ -1,0 +1,50 @@
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7); /* затемнение фона */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 300ms linear background-color;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.modal-content iframe {
+  width: 90vw;
+  height: 90vh;
+  border: none;
+  display: block;
+}
+
+.loader {
+  position: fixed;
+  inset: 0;
+  background-color: black;
+  opacity: 1;
+  visibility: visible;
+  cursor: not-allowed;
+  z-index: 999999;
+  font-size: 4rem;
+  display: grid;
+  place-content: center;
+  letter-spacing: .5rem;
+  color: #fff;
+    opacity: 1;
+}
+
+.loader.visible {
+  background-color: transparent;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 2s;
+}
