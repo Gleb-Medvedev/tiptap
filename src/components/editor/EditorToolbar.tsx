@@ -208,59 +208,6 @@ const TOOLBAR_GROUPS_CONFIG: ToolbarButtonConfig[][] = [
   ]
 ];
 
-//столбец слева
-{/* <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-  <rect x="10" y="4" width="4" height="16" rx="1" ry="1" stroke="currentColor" />
-  <g className="icon-modifier" stroke="currentColor">
-    <line x1="4" y1="12" x2="8" y2="12" />
-    <line x1="6" y1="10" x2="6" y2="14" />
-  </g>
-</svg> */}
-
-//столбец справа
-{/* <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-  <rect x="10" y="4" width="4" height="16" rx="1" ry="1" stroke="currentColor" />
-  <g className="icon-modifier" stroke="currentColor">
-    <line x1="20" y1="12" x2="16" y2="12" />
-    <line x1="18" y1="10" x2="18" y2="14" />
-  </g>
-</svg> */}
-
-//удалить столбец
-{/* <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-  <rect x="10" y="4" width="4" height="16" rx="1" ry="1" stroke="currentColor" />
-  <g className="icon-modifier" stroke="currentColor">
-    <line x1="6" y1="12" x2="18" y2="12" />
-  </g>
-</svg> */}
-
-
-//строка сверху
-{/* <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-  <rect x="4" y="10" width="16" height="4" rx="1" ry="1" stroke="currentColor" />
-  <g className="icon-modifier" stroke="currentColor">
-    <line x1="12" y1="4" x2="12" y2="8" />
-    <line x1="10" y1="6" x2="14" y2="6" />
-  </g>
-</svg> */}
-
-//строка снизу
-{/* <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-  <rect x="4" y="10" width="16" height="4" rx="1" ry="1" stroke="currentColor" />
-  <g className="icon-modifier" stroke="currentColor">
-    <line x1="12" y1="20" x2="12" y2="16" />
-    <line x1="10" y1="18" x2="14" y2="18" />
-  </g>
-</svg> */}
-
-// удалить строку
-{/* <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-  <rect x="4" y="10" width="16" height="4" rx="1" ry="1" stroke="currentColor" />
-  <g className="icon-modifier" stroke="currentColor">
-    <line x1="6" y1="12" x2="18" y2="12" />
-  </g>
-</svg> */}
-
 type ToolbarSecondaryButtonsConfig = Omit<ToolbarButtonConfigBase, 'actionValue'> & {actionValue?: string};
 
 const TOOLBAR_SECONDARY_BUTTONS: ToolbarSecondaryButtonsConfig[] = [
@@ -337,7 +284,7 @@ const TOOLBAR_TABLE_BUTTONS: ToolbarTableBtnsConfig[][] = [
   ],
   [
     {
-      label: 'Удалить текущую таблицу',
+      label: 'Удалить выделенную таблицу',
       actionValue: 'delete-table',
       icon: <GridOffOutlinedIcon />,
     }
@@ -395,6 +342,8 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
         editor.chain().focus().toggleBulletList().run();
       } else if (actionValue === 'blockquote') {
         editor.chain().focus().toggleBlockquote().run();
+      } else if (actionValue === 'codeBlock') {
+        editor.chain().focus().toggleCodeBlock().run();
       }
       break;
 
@@ -520,7 +469,6 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
                   {buttonGroup.map((buttonConfig, btnIndex) => (
                     <li key={`Table-button-${btnIndex}`} className='secondary-buttons__list-item'>
                       <ToolbarButtonTooltip {...buttonConfig}>
-                        {/* <div> */}
                           <IconButton
                             onClick={() => onClickCellAction!(buttonConfig.actionValue as TableCellAction)}
                             disabled={!editor?.isActive('table')}
@@ -528,7 +476,6 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
                           >
                             {renderTableBtnIcon(groupIndex, buttonConfig, btnIndex)}
                           </IconButton>
-                        {/* </div> */}
                       </ToolbarButtonTooltip>
                     </li>
                   ))}

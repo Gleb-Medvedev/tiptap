@@ -7,7 +7,14 @@ type ToolbarTooltipProps = {
   children: React.JSX.Element;
 };
 
-const ToolbarButtonTooltip = ({ label, additionalInfo, children }: ToolbarTooltipProps) => (
+const ToolbarButtonTooltip = ({ label, additionalInfo, children }: ToolbarTooltipProps) => {
+  const isDisabled = children?.props?.disabled;
+
+  if (isDisabled) {
+    return children;
+  }
+
+  return (    
   <Tooltip
     arrow
     title={
@@ -25,6 +32,7 @@ const ToolbarButtonTooltip = ({ label, additionalInfo, children }: ToolbarToolti
   >
     {children}
   </Tooltip>
-);
+  )
+}
 
 export default ToolbarButtonTooltip;

@@ -7,15 +7,15 @@ import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
-// import Blockquote from '@tiptap/extension-blockquote';
 import Underline from '@tiptap/extension-underline';
-// import Code from '@tiptap/extension-code';
 import TextAlign from '@tiptap/extension-text-align';
-// import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import {common, createLowlight} from 'lowlight'
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
+import 'highlight.js/styles/github.css';
 // import HorizontalRule from '@tiptap/extension-horizontal-rule';
-import { generateHTML } from '@tiptap/html';
+// import { generateHTML } from '@tiptap/html';
 import MarkdownIt from 'markdown-it';
-import TurndownService from 'turndown';
+// import TurndownService from 'turndown';
 import './Editor.css';
 import Toolbar from './EditorToolbar';
 import TableGridSizePickerPopup from './TableGridSizePickerPopup';
@@ -25,7 +25,9 @@ import Modal from './Modal';
 import type { TableCellAction } from "./EditorToolbar";
 
 const md = new MarkdownIt();
-const turndownService = new TurndownService();
+// const turndownService = new TurndownService();
+
+const lowlight = createLowlight(common)
 
 interface SmartMarkdownProps {
   onInsertTable?: () => void;
@@ -50,6 +52,9 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
     TextAlign.configure({
       types: ['heading', 'paragraph'],
     }),
+    CodeBlockLowlight.configure({
+      lowlight,
+    }),
     Image,
     Link.configure({
       openOnClick: false,
@@ -59,14 +64,12 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
     TableRow,
     TableHeader,
     TableCell,
-    // Blockquote,
-    // HorizontalRule,
   ],
     content: md.render(`# Привет! \n\n**Это жирный**, *а это курсивный* текст.`),
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      const markdown = turndownService.turndown(html);
-    },
+    // onUpdate: ({ editor }) => {
+    //   const html = editor.getHTML();
+    //   const markdown = turndownService.turndown(html);
+    // },
     onBlur: () => {
       setShowTableGrid(false);
       setSelectedCellPosition(null);
@@ -96,6 +99,8 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
     },
   });
 
+
+//Вставка текста в редактор
   useEffect(() => {
     if (!editor) return;
 
