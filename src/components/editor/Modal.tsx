@@ -110,7 +110,7 @@ useEffect(() => {
 
   return (  
     <div>
-        <div className={`loader ${isModalLoad ? 'visible' : ''}`}>ЗАГРУЗКА</div>
+        <div className={`loader ${isModalLoad ? 'visible' : ''}`}><img src='https://pa1.aminoapps.com/9173/d076d49a25f91000d6f1febb5158df31176958e5r1-220-220_hq.gif'></img></div>
         <iframe
             src="https://embed.diagrams.net/?embed=1&proto=json"
             id="drawio-iframe"

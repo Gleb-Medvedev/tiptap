@@ -30,6 +30,7 @@
   position: fixed;
   inset: 0;
   background-color: black;
+  object-fit: contain;
   opacity: 1;
   visibility: visible;
   cursor: not-allowed;
@@ -43,8 +44,6 @@
 }
 
 .loader.visible {
-  background-color: transparent;
-  opacity: 0;
   visibility: hidden;
-  transition: all 2s;
+  transition: all 4s;
 }
