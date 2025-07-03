@@ -22,7 +22,7 @@ import TableGridSizePickerPopup from './TableGridSizePickerPopup';
 import MapsUgcOutlinedIcon from '@mui/icons-material/MapsUgcOutlined';
 import TableCellControls from './TableCellControls';
 import Modal from './Modal';
-import type { TableCellAction } from "./EditorToolbar";
+import type { TableCellActions } from "./EditorToolbar";
 
 const md = new MarkdownIt();
 // const turndownService = new TurndownService();
@@ -47,7 +47,6 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
 
   const CustomImageNode = Image.extend({
     addAttributes() {
-      console.log(this.parent)
       return {
         ...this.parent?.(),
         class: {
@@ -61,7 +60,7 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
   });
 
   const editor = useEditor({
-    extensions: [StarterKit, Underline, Table.configure({
+    extensions: [StarterKit.configure({codeBlock: false}), Underline, Table.configure({
       resizable: true,
     }),
     TextAlign.configure({
@@ -244,7 +243,7 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
   };
 }, [editor]);
 
-  const handleCellClick = (action: TableCellAction) => {
+  const handleCellClick = (action: TableCellActions) => {
   if (!editor || !editorRef.current) return;
 
   switch (action) {

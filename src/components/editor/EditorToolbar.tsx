@@ -253,7 +253,7 @@ export type TableCellActions =
   const deleteRowTableIcon =
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M20 6v4a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1z" stroke-width="2"/>
+      <path d="M20 6v4a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1z" strokeWidth="2"/>
       <path d="M10 16l4 4"/><path d="M10 20l4 -4"/>
     </svg>
 
@@ -271,7 +271,7 @@ export type TableCellActions =
 
   const deleteColTableIcon =
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{transform: 'rotate(-90deg)'}}>
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 6v4a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1z" stroke-width="2"/>
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 6v4a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1z" strokeWidth="2"/>
       <path d="M10 16l4 4"/><path d="M10 20l4 -4"/>
     </svg>
 
@@ -376,7 +376,7 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
         const imageUrl = window.prompt('Введите ссылку на изображение');
         if (!imageUrl) return;
         editor.chain().focus().setImage({ src: imageUrl }).run();
-        return; // ← важно
+        return;
       }
       break;
 
@@ -472,7 +472,7 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
                 <ToolbarButtonTooltip {...secondaryButton}>
                   <IconButton
                     disableRipple
-                    // todo пофиксить типы
+                    // todo пофиксить типы и убрать type assertion
                     onMouseDown={() => handleButtonClick(secondaryButton as ToolbarButtonConfig)}
                   >
                   {secondaryButton.icon}
@@ -494,7 +494,6 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
                             disabled={!editor?.isActive('table')}
                             disableRipple
                           >
-                            {/* {renderTableBtnIcon(groupIndex, buttonConfig, btnIndex)} */}
                             <span className='table-button__inner-wrapper'>
                               {buttonConfig.icon}
                             </span>
