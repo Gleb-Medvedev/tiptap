@@ -24,10 +24,9 @@ import ToolbarButtonTooltip from './ButtonsTooltip';
 import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined';
 import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
 import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
-
 import FormatQuoteOutlinedIcon from '@mui/icons-material/FormatQuoteOutlined';
-
 import DrawOutlinedIcon from '@mui/icons-material/DrawOutlined';
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 
 const MUI_TOOLBAR_BTNS_STYLES = (isActive: boolean) => ({
   backgroundColor: isActive ? 'blue' : 'transparent',
@@ -181,6 +180,7 @@ const TOOLBAR_GROUPS_CONFIG: ToolbarButtonConfig[][] = [
       additionalInfo: 'CTRL + SHIFT + B'
     }
   ],
+  //Ссылка и картинка
   [
     {
       label: 'Ссылка',
@@ -188,8 +188,16 @@ const TOOLBAR_GROUPS_CONFIG: ToolbarButtonConfig[][] = [
       actionValue: 'link',
       additionalInfo: 'CTRL + SHIFT + L',
       icon: <LinkOutlinedIcon />,
-    }
+    },
+    {
+      label: 'Изображение',
+      action: 'node',
+      actionValue: 'image',
+      additionalInfo: 'CTRL + M',
+      icon: <ImageOutlinedIcon />,
+    },
   ],
+  //Код
   [
     {
       label: 'Однострочный код',
@@ -302,14 +310,14 @@ const Toolbar: FC<ToolbarProps> = ({editor, onInsertTable, onClickCellAction, on
     const [currentHeadingLever, setCurrentHeadingLevel] = useState<HeadingLevels>(0);
 
     const handleHeadingChange = (level: HeadingLevels) => {
-    if (!editor) return;
+      if (!editor) return;
 
-    if (level === 0) {
-        editor.chain().focus().setParagraph().run();
-    } else {
-      editor.chain().focus().toggleHeading({ level: level }).run();
-    }
-};
+      if (level === 0) {
+          editor.chain().focus().setParagraph().run();
+      } else {
+        editor.chain().focus().toggleHeading({ level: level }).run();
+      }
+    };
 
 const handleButtonClick = (btn: ToolbarButtonConfig) => {
   if (!editor) return;
@@ -344,6 +352,11 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
         editor.chain().focus().toggleBlockquote().run();
       } else if (actionValue === 'codeBlock') {
         editor.chain().focus().toggleCodeBlock().run();
+      } else if (actionValue === 'image') {
+        const imageUrl = window.prompt('Введите ссылку на изображение');
+        if (!imageUrl) return;
+        editor.chain().focus().setImage({ src: imageUrl }).run();
+        return; // ← важно
       }
       break;
 

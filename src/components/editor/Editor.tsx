@@ -27,23 +27,38 @@ import type { TableCellAction } from "./EditorToolbar";
 const md = new MarkdownIt();
 // const turndownService = new TurndownService();
 
-const lowlight = createLowlight(common)
+const lowlight = createLowlight(common);
 
 interface SmartMarkdownProps {
   onInsertTable?: () => void;
   onClickTableCell?: () => void;
 }
 
-type PositionType = { top: number, left: number, width: number, height: number };
+export type PositionType = { top: number, left: number, width: number, height: number };
 
 const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
-    const editorRef = useRef(null);
+  const editorRef = useRef(null);
 
-    const [selectedText, setSelectedText] = useState<string | null>(null);
-    const [showTableGrid, setShowTableGrid] = useState<boolean>(false);
-    const [selectedTextPopupPosition, setSelectedTextPopupPosition] = useState<Pick<PositionType, 'top' | 'left'> | null>(null);
-    const [selectedTableCellPosition, setSelectedCellPosition] = useState<PositionType | null>(null);
-    const [modalState, setModalState] = useState<boolean>(false);
+  const [selectedText, setSelectedText] = useState<string | null>(null);
+  const [showTableGrid, setShowTableGrid] = useState<boolean>(false);
+  const [selectedTextPopupPosition, setSelectedTextPopupPosition] = useState<Pick<PositionType, 'top' | 'left'> | null>(null);
+  const [selectedTableCellPosition, setSelectedCellPosition] = useState<PositionType | null>(null);
+  const [modalState, setModalState] = useState<boolean>(false);
+
+  const CustomImageNode = Image.extend({
+    addAttributes() {
+      console.log(this.parent)
+      return {
+        ...this.parent?.(),
+        class: {
+          default: 'inserted-image',
+        },
+        alt: {
+          default: 'изображение',
+        },
+      };
+    },
+  });
 
   const editor = useEditor({
     extensions: [StarterKit, Underline, Table.configure({
@@ -55,9 +70,9 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
     CodeBlockLowlight.configure({
       lowlight,
     }),
-    Image,
+    CustomImageNode,
     Link.configure({
-      openOnClick: false,
+      openOnClick: true,
       autolink: true,
       linkOnPaste: true,
     }),
@@ -101,32 +116,104 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
 
 
 //Вставка текста в редактор
+  // useEffect(() => {
+  //   if (!editor || !editorRef.current) return;
+
+  //   const handlePaste = (event: ClipboardEvent) => {
+  //     const html = event.clipboardData?.getData('text/html');
+  //     const text = event.clipboardData?.getData('text/plain');
+
+  //     if (html) {
+  //       editor.commands.setContent(html, false);
+  //       event.preventDefault();
+  //     } else if (text) {
+  //       editor.commands.setContent(md.render(text), false);
+  //       event.preventDefault();
+  //     }
+  //   };
+
+  //   document.addEventListener('paste', handlePaste);
+  //   return () => document.removeEventListener('paste', handlePaste);
+  // }, [editor]);
+
+
+
+
+  //вставка изображений через кнопку
   useEffect(() => {
-    if (!editor) return;
+  if (!editor || !editorRef.current) return;
 
-    const handlePaste = (event: ClipboardEvent) => {
-      const html = event.clipboardData?.getData('text/html');
-      const text = event.clipboardData?.getData('text/plain');
+  const handlePaste = async (event: ClipboardEvent) => {
+    const items = event.clipboardData?.items;
+    if (!items) return;
 
-      if (html) {
-        editor.commands.setContent(html, false);
+    for (const item of items) {
+      if (item.type.indexOf('image') === 0) {
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          const src = reader.result as string;
+          editor.chain().focus().setImage({ src }).run();
+        };
+        reader.readAsDataURL(file);
+
         event.preventDefault();
-      } else if (text) {
-        editor.commands.setContent(md.render(text), false);
-        event.preventDefault();
+        return;
+      }
+    }
+
+    const html = event.clipboardData?.getData('text/html');
+    const text = event.clipboardData?.getData('text/plain');
+
+    if (html) {
+      editor.commands.setContent(html, false);
+      event.preventDefault();
+    } else if (text) {
+      editor.commands.setContent(md.render(text), false);
+      event.preventDefault();
+    }
+  };
+
+  document.addEventListener('paste', handlePaste);
+  return () => document.removeEventListener('paste', handlePaste);
+}, [editor]);
+
+
+  //вставка изображений из буфера
+  useEffect(() => {
+    if (!editor || !editorRef.current) return;
+
+    const editorDom = editorRef.current as HTMLElement;
+
+    const handleDrop = (event: DragEvent) => {
+      const files = event.dataTransfer?.files;
+      if (!files || files.length === 0) return;
+
+      for (const file of files) {
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const src = reader.result as string;
+            editor.chain().focus().setImage({ src }).run();
+          };
+          reader.readAsDataURL(file);
+
+          event.preventDefault();
+          return;
+        }
       }
     };
 
-    document.addEventListener('paste', handlePaste);
-    return () => document.removeEventListener('paste', handlePaste);
+    editorDom.addEventListener('drop', handleDrop);
+    return () => editorDom.removeEventListener('drop', handleDrop);
   }, [editor]);
 
-  const handleInsertTableClick = () => {
-    setShowTableGrid(true);
-  };
 
+  //отображение кнопок добавления элементов таблицы рядом с выбранной ячейкой
   useEffect(() => {
-  if (!editor) return;
+  if (!editor || !editorRef.current) return;
 
   const showFocusedCellControls = () => {
     const view = editor.view;
@@ -157,8 +244,8 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
   };
 }, [editor]);
 
-  const handleTableAction = (action: TableCellAction) => {
-  if (!editor) return;
+  const handleCellClick = (action: TableCellAction) => {
+  if (!editor || !editorRef.current) return;
 
   switch (action) {
     case 'add-column-left':
@@ -190,15 +277,22 @@ const SmartMarkdownEditor: FC<SmartMarkdownProps> = () => {
   }
 };
 
-const toggleModalState = () => {
-  setModalState(prev => !prev);
+const handlePasteDiagramm = (dataUrl: string) => {
+    editor?.commands.insertContent({
+      type: 'image',
+      attrs: {
+        src: dataUrl,
+        alt: 'Диаграмма',
+      },
+    });
 }
+
 
   return (
     <div className='editor-container'>
-      <Toolbar editor={editor} onInsertTable={handleInsertTableClick} onClickCellAction={handleTableAction} onCLickCloseModal={() => setModalState(true)}/>
+      <Toolbar editor={editor} onInsertTable={() => setShowTableGrid(true)} onClickCellAction={handleCellClick} onCLickCloseModal={() => setModalState(true)}/>
 
-      {modalState && <Modal onClose={toggleModalState} />}
+      {modalState && <Modal onClose={() => setModalState(prev => !prev)} insertDrawioContentOnSave={handlePasteDiagramm}/>}
 
       {selectedText && selectedTextPopupPosition && (
         <div style={{ top: selectedTextPopupPosition?.top, left: selectedTextPopupPosition?.left }} className='selected-text__popup'>
@@ -206,7 +300,7 @@ const toggleModalState = () => {
         </div>
       )}
 
-      {selectedTableCellPosition && <TableCellControls position={selectedTableCellPosition} addTableElemOnCLick={handleTableAction} />}
+      {selectedTableCellPosition && <TableCellControls position={selectedTableCellPosition} addTableElemOnCLick={handleCellClick} />}
 
       {showTableGrid && (
         <TableGridSizePickerPopup

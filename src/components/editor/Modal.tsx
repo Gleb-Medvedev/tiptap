@@ -3,9 +3,10 @@ import './Modal.css';
 
 interface ModalProps {
     onClose: () => void;
+    insertDrawioContentOnSave?: (dataUrl: string) => void;
 }
 
-const Modal: FC<ModalProps> = ({onClose}) => {
+const Modal: FC<ModalProps> = ({onClose, insertDrawioContentOnSave}) => {
     const [isModalLoad, setIsModalLoad] = useState<boolean>(false);
 
 useEffect(() => {
@@ -33,9 +34,11 @@ useEffect(() => {
     if (typeof event.data !== 'string') return 
       const msg = JSON.parse(event.data);
 
+      const iframe = document.getElementById('drawio-iframe') as HTMLIFrameElement;
+
       switch(msg.event) {
         case 'init':
-            const iframe = document.getElementById('drawio-iframe') as HTMLIFrameElement;
+            // const iframe = document.getElementById('drawio-iframe') as HTMLIFrameElement;
             iframe.contentWindow?.postMessage(
             JSON.stringify({
                 action: 'load',
@@ -44,15 +47,57 @@ useEffect(() => {
             '*'
             );
             break;
-        case 'save':
-            const xml = msg.xml;
-            console.log(xml);
-            break;
+        // case 'save':
+        //     const xml = msg.xml;
+        //     // console.log(xml);
+        //     break;
+        
+
+        case 'save': {
+          const xml = msg.xml;
+
+          // Отправляем команду на экспорт изображения
+          const iframe = document.getElementById('drawio-iframe') as HTMLIFrameElement;
+          iframe.contentWindow?.postMessage(
+            JSON.stringify({
+              action: 'export',
+              format: 'png',
+              xml: xml,
+              spin: 'Экспорт...',
+            }),
+            '*'
+          );
+
+          break;
+        };
+
+        case 'export': {
+          const dataUrl = msg.data; // data:image/png;base64,...
+          if (dataUrl) {
+            insertDrawioContentOnSave?.(dataUrl); // 👈 передаём наружу
+            onClose();         // закрываем модалку
+          }
+          break;
+        }
+
+
         case 'exit':
             onClose();
             break;
+        // case 'export':
+        //   iframe.contentWindow?.postMessage(
+        //   JSON.stringify({
+        //     action: 'export',
+        //     format: 'png', // или 'svg'
+        //     xml: msg.xml,  // можно не передавать, если уже открыта диаграмма
+        //     spin: 'Exporting...',
+        //   }),
+        //   '*'
+        // );
+        // break;
+
         default:
-            break;
+            console.log(msg.event);
     }
   };
 

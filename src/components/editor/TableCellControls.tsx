@@ -3,13 +3,14 @@ import './TableCellControls.css';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import type { TableCellAction } from "./EditorToolbar";
 import ToolbarButtonTooltip from "./ButtonsTooltip";
+import type { PositionType } from "./Editor";
 
 const MUI_BTN_STYLES = {
     fontSize: '24px',
 }
 
 interface TableCellControlsProps {
-  position: { top: number; left: number; width: number; height: number } | null;
+  position: PositionType | null;
   addTableElemOnCLick: (addAction: TableCellAction) => void;
 }
 
