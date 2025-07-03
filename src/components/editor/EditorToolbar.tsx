@@ -13,13 +13,9 @@ import StrikethroughSOutlinedIcon from '@mui/icons-material/StrikethroughSOutlin
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BorderAllIcon from '@mui/icons-material/BorderAll';
-import AddIcon from '@mui/icons-material/Add';
-import Crop169Icon from '@mui/icons-material/Crop169';
 import { Editor } from '@tiptap/react';
 import { useState, type FC, type ReactNode } from 'react';
 import './EditorToolbar.css'
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import GridOffOutlinedIcon from '@mui/icons-material/GridOffOutlined';
 import ToolbarButtonTooltip from './ButtonsTooltip';
 import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined';
 import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
@@ -27,15 +23,12 @@ import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
 import FormatQuoteOutlinedIcon from '@mui/icons-material/FormatQuoteOutlined';
 import DrawOutlinedIcon from '@mui/icons-material/DrawOutlined';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
+import PlaylistRemoveOutlinedIcon from '@mui/icons-material/PlaylistRemoveOutlined';
 
 const MUI_TOOLBAR_BTNS_STYLES = (isActive: boolean) => ({
   backgroundColor: isActive ? 'blue' : 'transparent',
   color: isActive ? 'white' : 'default',
 });
-
-const MUI_TABLE_BTNS_STYLES = {
-  fontSize: 'medium',
-} as const;
 
 const MUI_SELECT_STYLES = {
     '& .MuiOutlinedInput-notchedOutline': {
@@ -236,11 +229,7 @@ const TOOLBAR_SECONDARY_BUTTONS: ToolbarSecondaryButtonsConfig[] = [
   },
 ];
 
-interface ToolbarTableBtnsConfig extends ToolbarButtonConfigBase {
-  additionalIcon?: ReactNode,
-}
-
-export type TableCellAction =
+export type TableCellActions =
   | 'add-column-left'
   | 'add-column-right'
   | 'delete-column'
@@ -249,52 +238,83 @@ export type TableCellAction =
   | 'delete-row'
   | 'delete-table';
 
-const TOOLBAR_TABLE_BUTTONS: ToolbarTableBtnsConfig[][] = [
+  const addColLeftTableIcon =
+    <svg viewBox="-4 -4 24 24" focusable="false" aria-hidden="true">
+      <rect width="16" height="16" fill="transparent" />
+      <path fill="currentColor" id="table-add-column" d="M12,11l-0,2l2,0l-0,-2l2,0l-0,-2l-2,0l-0,-2l-2,0l-0,2l-2,0l-0,2l2,0Zm2,-5l-0,-5c0,-0.265 -0.105,-0.52 -0.293,-0.707c-0.187,-0.188 -0.442,-0.293 -0.707,-0.293l-10,-0c-0.552,-0 -1,0.448 -1,1c-0,2.577 -0,11.423 0,14c0,0.552 0.448,1 1,1c1.916,0 8.084,0 10,0c0.552,-0 1,-0.448 1,-1l-0,-1l-5,0l-0,-12l3,0l-0,4l2,0Zm-10,-4l3,0l-0,12l-3,0l-0,-12Z"/>
+    </svg>
+
+  const addColRightTableIcon =
+    <svg viewBox="-4 -4 24 24" focusable="false" aria-hidden="true" style={{transform: 'scaleX(-1)'}}>
+      <rect width="16" height="16" fill="transparent" />
+      <path fill="currentColor" id="table-add-column" d="M12,11l-0,2l2,0l-0,-2l2,0l-0,-2l-2,0l-0,-2l-2,0l-0,2l-2,0l-0,2l2,0Zm2,-5l-0,-5c0,-0.265 -0.105,-0.52 -0.293,-0.707c-0.187,-0.188 -0.442,-0.293 -0.707,-0.293l-10,-0c-0.552,-0 -1,0.448 -1,1c-0,2.577 -0,11.423 0,14c0,0.552 0.448,1 1,1c1.916,0 8.084,0 10,0c0.552,-0 1,-0.448 1,-1l-0,-1l-5,0l-0,-12l3,0l-0,4l2,0Zm-10,-4l3,0l-0,12l-3,0l-0,-12Z"/>
+    </svg>
+
+  const deleteRowTableIcon =
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M20 6v4a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1z" stroke-width="2"/>
+      <path d="M10 16l4 4"/><path d="M10 20l4 -4"/>
+    </svg>
+
+  const addRowTopTableIcon =
+    <svg viewBox="-4 -4 24 24" focusable="false" aria-hidden="true" style={{transform: 'rotate(-90deg)'}}>
+      <rect width="16" height="16" fill="transparent" />
+      <path fill="currentColor" id="table-add-column" d="M12,11l-0,2l2,0l-0,-2l2,0l-0,-2l-2,0l-0,-2l-2,0l-0,2l-2,0l-0,2l2,0Zm2,-5l-0,-5c0,-0.265 -0.105,-0.52 -0.293,-0.707c-0.187,-0.188 -0.442,-0.293 -0.707,-0.293l-10,-0c-0.552,-0 -1,0.448 -1,1c-0,2.577 -0,11.423 0,14c0,0.552 0.448,1 1,1c1.916,0 8.084,0 10,0c0.552,-0 1,-0.448 1,-1l-0,-1l-5,0l-0,-12l3,0l-0,4l2,0Zm-10,-4l3,0l-0,12l-3,0l-0,-12Z"/>
+    </svg>
+
+  const addRowBottomTableIcon =
+    <svg viewBox="-4 -4 24 24" focusable="false" aria-hidden="true" style={{transform: 'rotate(90deg)'}}>
+      <rect width="16" height="16" fill="transparent" />
+      <path fill="currentColor" id="table-add-column" d="M12,11l-0,2l2,0l-0,-2l2,0l-0,-2l-2,0l-0,-2l-2,0l-0,2l-2,0l-0,2l2,0Zm2,-5l-0,-5c0,-0.265 -0.105,-0.52 -0.293,-0.707c-0.187,-0.188 -0.442,-0.293 -0.707,-0.293l-10,-0c-0.552,-0 -1,0.448 -1,1c-0,2.577 -0,11.423 0,14c0,0.552 0.448,1 1,1c1.916,0 8.084,0 10,0c0.552,-0 1,-0.448 1,-1l-0,-1l-5,0l-0,-12l3,0l-0,4l2,0Zm-10,-4l3,0l-0,12l-3,0l-0,-12Z"/>
+    </svg>
+
+  const deleteColTableIcon =
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{transform: 'rotate(-90deg)'}}>
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 6v4a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1z" stroke-width="2"/>
+      <path d="M10 16l4 4"/><path d="M10 20l4 -4"/>
+    </svg>
+
+const TOOLBAR_TABLE_BUTTONS: ToolbarButtonConfigBase[][] = [
   [
     {
       label: 'Добавить столбец слева',
       actionValue: 'add-column-left',
-      icon: <Crop169Icon />,
-      additionalIcon: <AddIcon sx={MUI_TABLE_BTNS_STYLES} />,
+      icon: addColRightTableIcon,
     },
       {
       label: 'Добавить столбец справа',
       actionValue: 'add-column-right',
-      icon: <Crop169Icon />,
-      additionalIcon: <AddIcon sx={MUI_TABLE_BTNS_STYLES} />,
+      icon: addColLeftTableIcon,
     },
       {
       label: 'Удалить выделенный столбец',
       actionValue: 'delete-column',
-      icon: <Crop169Icon />,
-      additionalIcon: <CloseOutlinedIcon />,
+      icon: deleteColTableIcon,
     },
   ],
   [
     {
       label: 'Добавить строку сверху',
       actionValue: 'add-row-top',
-      icon: <Crop169Icon />,
-      additionalIcon: <AddIcon sx={MUI_TABLE_BTNS_STYLES} />,
+      icon: addRowTopTableIcon,
     },
       {
       label: 'Добавить строку снизу',
       actionValue: 'add-row-bottom',
-      icon: <Crop169Icon />,
-      additionalIcon: <AddIcon sx={MUI_TABLE_BTNS_STYLES} />,
+      icon: addRowBottomTableIcon,
     },
       {
       label: 'Удалить выделенную строку',
       actionValue: 'delete-row',
-      icon: <Crop169Icon />,
-      additionalIcon: <CloseOutlinedIcon />,
+      icon: deleteRowTableIcon,
     },
   ],
   [
     {
       label: 'Удалить выделенную таблицу',
       actionValue: 'delete-table',
-      icon: <GridOffOutlinedIcon />,
+      icon: <PlaylistRemoveOutlinedIcon />,
     }
   ]
 ];
@@ -302,7 +322,7 @@ const TOOLBAR_TABLE_BUTTONS: ToolbarTableBtnsConfig[][] = [
 interface ToolbarProps {
     editor: Editor | null;
     onInsertTable?: () => void;
-    onClickCellAction?: (actionValue: TableCellAction) => void;
+    onClickCellAction?: (actionValue: TableCellActions) => void;
     onCLickCloseModal?: () => void;
 }
 
@@ -376,19 +396,6 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
       break;
   }
 };
-
-  const renderTableBtnIcon = (tableGroupIndex: number, btnConfig: ToolbarTableBtnsConfig, tableBtnIndex: number) => {
-    return (
-        <span className='table-button__inner-wrapper'>
-          <span className='table-button__icon-container' style={{transform: tableGroupIndex === 0 ? 'rotate(90deg)' : 'unset'}}>
-            {btnConfig.icon}
-          </span>
-
-          {tableGroupIndex === 0 && btnConfig.additionalIcon && <span className='table-button__secondary-text' style={{color: editor?.isActive('table') ? tableBtnIndex !== 2 ? 'green' : 'red' : '#666', left: tableBtnIndex === 0 ? '20%' : tableBtnIndex !== 2 ? '80%' : '50%', top: tableBtnIndex === 2 ? '55%' : '50%' }}>{btnConfig.additionalIcon}</span>}
-          {tableGroupIndex === 1 && btnConfig.additionalIcon && <span className='table-button__secondary-text' style={{color: editor?.isActive('table') ? tableBtnIndex !== 2 ? 'green' : 'red' : '#666', top: tableBtnIndex === 0 ? '20%' : tableBtnIndex !== 2 ? '80%' : '55%' }}>{btnConfig.additionalIcon}</span>}
-      </span>
-    )
-  }
 
     return (
         <div className='toolbar-container'>
@@ -483,11 +490,14 @@ const handleButtonClick = (btn: ToolbarButtonConfig) => {
                     <li key={`Table-button-${btnIndex}`} className='secondary-buttons__list-item'>
                       <ToolbarButtonTooltip {...buttonConfig}>
                           <IconButton
-                            onClick={() => onClickCellAction!(buttonConfig.actionValue as TableCellAction)}
+                            onClick={() => onClickCellAction!(buttonConfig.actionValue as TableCellActions)}
                             disabled={!editor?.isActive('table')}
                             disableRipple
                           >
-                            {renderTableBtnIcon(groupIndex, buttonConfig, btnIndex)}
+                            {/* {renderTableBtnIcon(groupIndex, buttonConfig, btnIndex)} */}
+                            <span className='table-button__inner-wrapper'>
+                              {buttonConfig.icon}
+                            </span>
                           </IconButton>
                       </ToolbarButtonTooltip>
                     </li>
